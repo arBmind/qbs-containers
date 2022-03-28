@@ -93,7 +93,7 @@ RUN \
   && rm -rf /var/lib/apt/lists/{apt,dpkg,cache,log} /tmp/* /var/tmp/*
 
 
-# final qbs-gcc (minimal Qt)
+# final qbs-gcc (no Qt)
 FROM gcc_base AS qbs-gcc
 ARG DISTRO
 ARG GCC_MAJOR
@@ -111,7 +111,7 @@ RUN \
   qbs setup-toolchains --type gcc /usr/bin/g++ gcc \
   && qbs config defaultProfile gcc
 
-WORKDIR /build
+WORKDIR /project
 ENTRYPOINT ["/opt/qbs/bin/qbs"]
 
 
@@ -137,7 +137,7 @@ RUN \
   && qbs setup-qt /qt/${QT_VERSION}/${QT_ARCH}/bin/qmake qt \
   && qbs config defaultProfile qt
 
-WORKDIR /build
+WORKDIR /project
 ENTRYPOINT ["/opt/qbs/bin/qbs"]
 
 
@@ -203,7 +203,7 @@ RUN \
   qbs setup-toolchains --type clang /usr/bin/clang++ clang \
   && qbs config defaultProfile clang
 
-WORKDIR /build
+WORKDIR /project
 ENTRYPOINT ["/opt/qbs/bin/qbs"]
 
 
@@ -224,7 +224,7 @@ RUN \
   && rm -rf /var/lib/apt/lists/{apt,dpkg,cache,log} /tmp/* /var/tmp/*
 
 
-# final qbs-clang (no Qt)
+# final qbs-clang-libstdcpp (no Qt)
 FROM clang_libstdcpp_base AS qbs-clang-libstdcpp
 ARG DISTRO
 ARG CLANG_MAJOR
@@ -241,7 +241,7 @@ RUN \
   qbs setup-toolchains --type clang /usr/bin/clang++ clang \
   && qbs config defaultProfile clang
 
-WORKDIR /build
+WORKDIR /project
 ENTRYPOINT ["/opt/qbs/bin/qbs"]
 
 
@@ -254,7 +254,7 @@ ARG QT_VERSION
 ARG QT_ARCH
 ARG QBS_VERSION
 
-LABEL Description="Ubuntu ${DISTRO} - Clang${CLANG_MAJOR} + Libstdc++-${GCC_MAJOR} + Qt ${QT_VERSION} + Qbs ${QBS_VERSION}"
+LABEL Description="Ubuntu ${DISTRO} - Clang${CLANG_MAJOR} + Libstdc++-${GCC_MAJOR} + Qbs ${QBS_VERSION} + Qt ${QT_VERSION}"
 
 COPY --from=qbs_base /opt/qbs /opt/qbs
 COPY --from=qt_base /qt/${QT_VERSION} /qt/${QT_VERSION}
@@ -268,5 +268,5 @@ RUN \
   && qbs setup-qt /qt/${QT_VERSION}/${QT_ARCH}/bin/qmake qt \
   && qbs config defaultProfile qt
 
-WORKDIR /build
+WORKDIR /project
 ENTRYPOINT ["/opt/qbs/bin/qbs"]
