@@ -8,16 +8,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        qbs_version: ['1.21.0']
+        qbs_version: ['1.21.0', '1.22.0']
         clang_major: [12, 13, 14]
         gcc_major: [9, 10, 11]
-        qt_version: ['6.2.4']
+        qt_version: ['6.3.0']
 
         include:
-          - qbs_version: '1.21.0'
+          - qbs_version: '1.22.0'
             clang_major: 14
             gcc_major: 11
-            qt_version: '6.2.4'
+            qt_version: '6.3.0'
             gcc_tags: arbmind/qbs-gcc:latest
             gcc_qt_tags: arbmind/qbs-gcc-qt:latest
             clang_tags: arbmind/qbs-clang:latest
