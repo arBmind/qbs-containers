@@ -6,7 +6,7 @@ ARG QT_ARCH=gcc_64
 ARG QT_MODULES=""
 ARG QBS_VERSION="1.21.0"
 ARG QBS_URL="https://download.qt.io/official_releases/qbs/${QBS_VERSION}/qbs-linux-x86_64-${QBS_VERSION}.tar.gz"
-ARG RUNTIME_APT="libicu66 libgssapi-krb5-2 libdbus-1-3 libpcre2-16-0"
+ARG RUNTIME_APT="libicu70 libgssapi-krb5-2 libdbus-1-3 libpcre2-16-0"
 
 
 # base Qt setup
@@ -41,7 +41,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 RUN \
   apt-get update --quiet \
-  && apt-get upgrade \
+  && apt-get upgrade --yes --quiet \
   && apt-get install --yes --quiet --no-install-recommends \
     ca-certificates \
     wget \
@@ -68,7 +68,7 @@ ENV \
 
 RUN \
   apt-get update --quiet \
-  && apt-get upgrade \
+  && apt-get upgrade --yes --quiet \
   && apt-get install --yes --quiet --no-install-recommends \
     libglib2.0-0 \
     apt-transport-https \
