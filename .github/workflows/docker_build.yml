@@ -9,15 +9,15 @@ jobs:
       fail-fast: false
       matrix:
         distro: ['jammy']
-        qbs_version: ['1.21.0', '1.22.1']
-        clang_major: [13, 14]
+        qbs_version: ['1.21.0', '1.22.1', '1.23.1']
+        clang_major: [13, 14, 15]
         gcc_major: [10, 11, 12]
         qt_version: ['6.3.1']
 
         include:
           - distro: jammy
-            qbs_version: '1.22.1'
-            clang_major: 14
+            qbs_version: '1.23.1'
+            clang_major: 15
             gcc_major: 12
             qt_version: '6.3.1'
             gcc_tags: arbmind/qbs-gcc:latest
