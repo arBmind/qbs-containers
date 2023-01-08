@@ -9,17 +9,17 @@ jobs:
       fail-fast: false
       matrix:
         distro: ['jammy']
-        qbs_version: ['1.21.0', '1.22.1', '1.23.1']
+        qbs_version: ['1.22.1', '1.23.2', '1.24.0']
         clang_major: [13, 14, 15]
         gcc_major: [10, 11, 12]
-        qt_version: ['6.3.2']
+        qt_version: ['6.3.2', '6.4.2']
 
         include:
           - distro: jammy
-            qbs_version: '1.23.1'
+            qbs_version: '1.24.0'
             clang_major: 15
             gcc_major: 12
-            qt_version: '6.3.2'
+            qt_version: '6.4.2'
             gcc_tags: arbmind/qbs-gcc:latest
             gcc_qt_tags: arbmind/qbs-gcc-qt:latest
             clang_tags: arbmind/qbs-clang:latest
@@ -28,20 +28,20 @@ jobs:
 
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v2
 
       - name: Login to DockerHub
         if: github.event_name != 'pull_request'
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Qbs ${{ matrix.qbs_version }} + GCC ${{ matrix.gcc_major }}
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         with:
           # buildkitd-flags: --debug
           target: qbs-gcc
@@ -56,7 +56,7 @@ jobs:
             QBS_VERSION=${{ matrix.qbs_version }}
 
       - name: Qbs ${{ matrix.qbs_version }} + GCC ${{ matrix.gcc_major }} + Qt ${{ matrix.qt_version }}
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         with:
           target: qbs-gcc-qt
           push: ${{ github.event_name != 'pull_request' }}
@@ -70,7 +70,7 @@ jobs:
             QBS_VERSION=${{ matrix.qbs_version }}
 
       - name: Qbs ${{ matrix.qbs_version }} + Clang ${{ matrix.clang_major }}
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         with:
           target: qbs-clang
           push: ${{ github.event_name != 'pull_request' }}
@@ -84,7 +84,7 @@ jobs:
             QBS_VERSION=${{ matrix.qbs_version }}
 
       - name: Qbs ${{ matrix.qbs_version }} + Clang ${{ matrix.clang_major }} + LibStdC++ ${{ matrix.gcc_major }}
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         with:
           target: qbs-clang-libstdcpp
           push: ${{ github.event_name != 'pull_request' }}
@@ -99,7 +99,7 @@ jobs:
             QBS_VERSION=${{ matrix.qbs_version }}
 
       - name: Qbs ${{ matrix.qbs_version }} + Clang ${{ matrix.clang_major }} + LibStdC++ ${{ matrix.gcc_major }} + Qt ${{ matrix.qt_version }}
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         with:
           target: qbs-clang-libstdcpp-qt
           push: ${{ github.event_name != 'pull_request' }}
