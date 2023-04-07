@@ -12,14 +12,14 @@ jobs:
         qbs_version: ['1.22.1', '1.23.2', '1.24.1']
         clang_major: [14, 15, 16]
         gcc_major: [10, 11, 12]
-        qt_version: ['6.3.2', '6.4.2']
+        qt_version: ['6.4.3', '6.5.0']
 
         include:
           - distro: jammy
             qbs_version: '1.24.1'
             clang_major: 16
             gcc_major: 12
-            qt_version: '6.4.2'
+            qt_version: '6.5.0'
             gcc_tags: arbmind/qbs-gcc:latest
             gcc_qt_tags: arbmind/qbs-gcc-qt:latest
             clang_tags: arbmind/qbs-clang:latest
