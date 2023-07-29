@@ -113,6 +113,7 @@ ARG QT_ARCH
 ARG QBS_VERSION
 
 LABEL Description="Ubuntu ${DISTRO} - Gcc${GCC_MAJOR} + Qbs ${QBS_VERSION}"
+LABEL org.opencontainers.image.source = "https://github.com/arBmind/qbs-containers"
 
 COPY --from=qbs_base /opt/qbs /opt/qbs
 ENV \
@@ -135,6 +136,7 @@ ARG QT_ARCH
 ARG QBS_VERSION
 
 LABEL Description="Ubuntu ${DISTRO} - Gcc${GCC_MAJOR} + Qbs ${QBS_VERSION} + Qt ${QT_VERSION}"
+LABEL org.opencontainers.image.source = "https://github.com/arBmind/qbs-containers"
 
 COPY --from=qbs_base /opt/qbs /opt/qbs
 COPY --from=qt_base /qt/${QT_VERSION} /qt/${QT_VERSION}
@@ -208,6 +210,7 @@ ARG APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1
 ARG DEBIAN_FRONTEND=noninteractive
 
 LABEL Description="Ubuntu ${DISTRO} - Clang${CLANG_MAJOR} + Qbs ${QBS_VERSION}"
+LABEL org.opencontainers.image.source = "https://github.com/arBmind/qbs-containers"
 
 COPY --from=qbs_base /opt/qbs /opt/qbs
 ENV \
@@ -249,6 +252,7 @@ ARG GCC_MAJOR
 ARG QBS_VERSION
 
 LABEL Description="Ubuntu ${DISTRO} - Clang${CLANG_MAJOR} + Libstdc++-${GCC_MAJOR} + Qbs ${QBS_VERSION}"
+LABEL org.opencontainers.image.source = "https://github.com/arBmind/qbs-containers"
 
 COPY --from=qbs_base /opt/qbs /opt/qbs
 ENV \
@@ -272,6 +276,7 @@ ARG QT_ARCH
 ARG QBS_VERSION
 
 LABEL Description="Ubuntu ${DISTRO} - Clang${CLANG_MAJOR} + Libstdc++-${GCC_MAJOR} + Qbs ${QBS_VERSION} + Qt ${QT_VERSION}"
+LABEL org.opencontainers.image.source = "https://github.com/arBmind/qbs-containers"
 
 COPY --from=qbs_base /opt/qbs /opt/qbs
 COPY --from=qt_base /qt/${QT_VERSION} /qt/${QT_VERSION}
