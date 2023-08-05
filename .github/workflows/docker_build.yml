@@ -9,7 +9,7 @@ jobs:
       fail-fast: false
       matrix:
         distro: ['lunar']
-        qbs_version: ['1.24.1', '2.0.2', '2.1.0']
+        qbs_version: ['1.24.1', '2.0.2', '2.1.1']
         clang: [
           {major: 14, source: 'apt'},
           {major: 15, source: 'apt'},
@@ -24,7 +24,7 @@ jobs:
 
         include:
           - distro: lunar
-            qbs_version: '2.1.0'
+            qbs_version: '2.1.1'
             clang: {major: 16, source: 'apt'}
             gcc: {major: 13, source: 'apt'}
             qt_version: '6.5.2'
