@@ -9,7 +9,7 @@ jobs:
       fail-fast: false
       matrix:
         distro: ['lunar']
-        qbs_version: ['1.24.1', '2.0.2', '2.1.1']
+        qbs_version: ['1.24.1', '2.0.2', '2.1.2']
         clang: [
           {major: 15, source: 'apt'},
           {major: 16, source: 'apt'},
@@ -20,14 +20,14 @@ jobs:
           {major: 12, source: 'apt'},
           {major: 13, source: 'apt'}
         ]
-        qt_version: ['6.4.3', '6.5.2']
+        qt_version: ['6.4.3', '6.5.3']
 
         include:
           - distro: lunar
-            qbs_version: '2.1.1'
+            qbs_version: '2.1.2'
             clang: {major: 17, source: 'llvm'}
             gcc: {major: 13, source: 'apt'}
-            qt_version: '6.5.2'
+            qt_version: '6.5.3'
             gcc_tags: |
               arbmind/qbs-gcc:latest
               ghcr.io/arbmind/qbs-gcc:latest
