@@ -1,20 +1,22 @@
-ARG DISTRO=lunar
-ARG CLANG_MAJOR=16
+ARG DISTRO=noble
+ARG CLANG_MAJOR=18
 # clang source options:
 # apt - directly use apt version
 # llvm - add llvm distro repo
 ARG CLANG_SOURCE=apt
-ARG GCC_MAJOR=13
+ARG GCC_MAJOR=14
 # gcc source options:
 # apt - directly use apt version
 # ppa - add toolchain ppa
 ARG GCC_SOURCE=apt
-ARG QT_VERSION=6.5.0
-ARG QT_ARCH=gcc_64
+ARG QT_VERSION=6.7.1
+ARG QT_ARCH=linux_gcc_64
 ARG QT_MODULES=""
-ARG QBS_VERSION="2.0.0"
+ARG QBS_VERSION="2.3.1"
 ARG QBS_URL="https://download.qt.io/official_releases/qbs/${QBS_VERSION}/qbs-linux-x86_64-${QBS_VERSION}.tar.gz"
-ARG RUNTIME_APT="libicu72 libgssapi-krb5-2 libdbus-1-3 libpcre2-16-0"
+# Ubuntu lunar
+# ARG RUNTIME_APT="libicu72 libgssapi-krb5-2 libdbus-1-3 libpcre2-16-0"
+ARG RUNTIME_APT="libicu74 libgssapi-krb5-2 libdbus-1-3 libpcre2-16-0"
 
 
 # base Qt setup
@@ -141,13 +143,13 @@ LABEL org.opencontainers.image.source = "https://github.com/arBmind/qbs-containe
 COPY --from=qbs_base /opt/qbs /opt/qbs
 COPY --from=qt_base /qt/${QT_VERSION} /qt/${QT_VERSION}
 ENV \
-  QTDIR=/qt/${QT_VERSION}/${QT_ARCH} \
-  PATH=/qt/${QT_VERSION}/${QT_ARCH}/bin:/opt/qbs/bin:${PATH} \
-  LD_LIBRARY_PATH=/qt/${QT_VERSION}/${QT_ARCH}/lib:${LD_LIBRARY_PATH}
+  QTDIR=/qt/${QT_VERSION}/gcc_64 \
+  PATH=/qt/${QT_VERSION}/gcc_64/bin:/opt/qbs/bin:${PATH} \
+  LD_LIBRARY_PATH=/qt/${QT_VERSION}/gcc_64/lib:${LD_LIBRARY_PATH}
 
 RUN \
   qbs setup-toolchains --type gcc /usr/bin/g++ gcc \
-  && qbs setup-qt /qt/${QT_VERSION}/${QT_ARCH}/bin/qmake qt \
+  && qbs setup-qt /qt/${QT_VERSION}/gcc_64/bin/qmake qt \
   && qbs config defaultProfile qt
 
 WORKDIR /project
@@ -281,13 +283,13 @@ LABEL org.opencontainers.image.source = "https://github.com/arBmind/qbs-containe
 COPY --from=qbs_base /opt/qbs /opt/qbs
 COPY --from=qt_base /qt/${QT_VERSION} /qt/${QT_VERSION}
 ENV \
-  QTDIR=/qt/${QT_VERSION}/${QT_ARCH} \
-  PATH=/qt/${QT_VERSION}/${QT_ARCH}/bin:/opt/qbs/bin:${PATH} \
-  LD_LIBRARY_PATH=/qt/${QT_VERSION}/${QT_ARCH}/lib:${LD_LIBRARY_PATH}
+  QTDIR=/qt/${QT_VERSION}/gcc_64 \
+  PATH=/qt/${QT_VERSION}/gcc_64/bin:/opt/qbs/bin:${PATH} \
+  LD_LIBRARY_PATH=/qt/${QT_VERSION}/gcc_64/lib:${LD_LIBRARY_PATH}
 
 RUN \
   qbs setup-toolchains --type clang /usr/bin/clang++ clang \
-  && qbs setup-qt /qt/${QT_VERSION}/${QT_ARCH}/bin/qmake qt \
+  && qbs setup-qt /qt/${QT_VERSION}/gcc_64/bin/qmake qt \
   && qbs config defaultProfile qt
 
 WORKDIR /project

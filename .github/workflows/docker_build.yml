@@ -8,26 +8,30 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        distro: ['lunar']
-        qbs_version: ['1.24.1', '2.0.2', '2.1.2']
+        distro: ['noble']
+        qbs_version: ['2.1.2', '2.2.2', '2.3.1']
         clang: [
-          {major: 15, source: 'apt'},
           {major: 16, source: 'apt'},
-          {major: 17, source: 'llvm'}
+          {major: 17, source: 'llvm'},
+          {major: 18, source: 'llvm'}
         ]
         gcc: [
-          {major: 11, source: 'apt'},
           {major: 12, source: 'apt'},
-          {major: 13, source: 'apt'}
+          {major: 13, source: 'apt'},
+          {major: 14, source: 'apt'}
         ]
-        qt_version: ['6.4.3', '6.5.3']
+        qt: [
+          {version: '6.5.3', arch: 'gcc_64'},
+          {version: '6.6.3', arch: 'gcc_64'},
+          {version: '6.7.1', arch: 'linux_gcc_64'}
+        ]
 
         include:
-          - distro: lunar
-            qbs_version: '2.1.2'
-            clang: {major: 17, source: 'llvm'}
-            gcc: {major: 13, source: 'apt'}
-            qt_version: '6.5.3'
+          - distro: noble
+            qbs_version: '2.3.1'
+            clang: {major: 18, source: 'llvm'}
+            gcc: {major: 14, source: 'apt'}
+            qt: {version: '6.7.1', arch: 'linux_gcc_64'}
             gcc_tags: |
               arbmind/qbs-gcc:latest
               ghcr.io/arbmind/qbs-gcc:latest
@@ -80,23 +84,25 @@ jobs:
             DISTRO=${{ matrix.distro }}
             GCC_MAJOR=${{ matrix.gcc.major }}
             GCC_SOURCE=${{ matrix.gcc.source }}
-            QT_VERSION=${{ matrix.qt_version }}
+            QT_VERSION=${{ matrix.qt.version }}
+            QT_ARCH=${{ matrix.qt.arch }}
             QBS_VERSION=${{ matrix.qbs_version }}
 
-      - name: Qbs ${{ matrix.qbs_version }} + GCC ${{ matrix.gcc.major }} + Qt ${{ matrix.qt_version }}
+      - name: Qbs ${{ matrix.qbs_version }} + GCC ${{ matrix.gcc.major }} + Qt ${{ matrix.qt.version }}
         uses: docker/build-push-action@v3
         with:
           target: qbs-gcc-qt
           push: ${{ github.event_name != 'pull_request' }}
           tags: |
-            arbmind/qbs-gcc-qt:${{ matrix.qbs_version }}-${{ matrix.gcc.major }}-${{ matrix.qt_version }}
-            ghcr.io/arbmind/qbs-gcc-qt:${{ matrix.qbs_version }}-${{ matrix.gcc.major }}-${{ matrix.qt_version }}
+            arbmind/qbs-gcc-qt:${{ matrix.qbs_version }}-${{ matrix.gcc.major }}-${{ matrix.qt.version }}
+            ghcr.io/arbmind/qbs-gcc-qt:${{ matrix.qbs_version }}-${{ matrix.gcc.major }}-${{ matrix.qt.version }}
             ${{ matrix.gcc_qt_tags }}
           build-args: |
             DISTRO=${{ matrix.distro }}
             GCC_MAJOR=${{ matrix.gcc.major }}
             GCC_SOURCE=${{ matrix.gcc.source }}
-            QT_VERSION=${{ matrix.qt_version }}
+            QT_VERSION=${{ matrix.qt.version }}
+            QT_ARCH=${{ matrix.qt.arch }}
             QBS_VERSION=${{ matrix.qbs_version }}
 
       - name: Qbs ${{ matrix.qbs_version }} + Clang ${{ matrix.clang.major }}
@@ -112,7 +118,8 @@ jobs:
             DISTRO=${{ matrix.distro }}
             CLANG_MAJOR=${{ matrix.clang.major }}
             CLANG_SOURCE=${{ matrix.clang.source }}
-            QT_VERSION=${{ matrix.qt_version }}
+            QT_VERSION=${{ matrix.qt.version }}
+            QT_ARCH=${{ matrix.qt.arch }}
             QBS_VERSION=${{ matrix.qbs_version }}
 
       - name: Qbs ${{ matrix.qbs_version }} + Clang ${{ matrix.clang.major }} + LibStdC++ ${{ matrix.gcc.major }}
@@ -130,17 +137,18 @@ jobs:
             CLANG_SOURCE=${{ matrix.clang.source }}
             GCC_MAJOR=${{ matrix.gcc.major }}
             GCC_SOURCE=${{ matrix.gcc.source }}
-            QT_VERSION=${{ matrix.qt_version }}
+            QT_VERSION=${{ matrix.qt.version }}
+            QT_ARCH=${{ matrix.qt.arch }}
             QBS_VERSION=${{ matrix.qbs_version }}
 
-      - name: Qbs ${{ matrix.qbs_version }} + Clang ${{ matrix.clang.major }} + LibStdC++ ${{ matrix.gcc.major }} + Qt ${{ matrix.qt_version }}
+      - name: Qbs ${{ matrix.qbs_version }} + Clang ${{ matrix.clang.major }} + LibStdC++ ${{ matrix.gcc.major }} + Qt ${{ matrix.qt.version }}
         uses: docker/build-push-action@v3
         with:
           target: qbs-clang-libstdcpp-qt
           push: ${{ github.event_name != 'pull_request' }}
           tags: |
-            arbmind/qbs-clang-libstdcpp-qt:${{ matrix.qbs_version }}-${{ matrix.clang.major }}-${{ matrix.gcc.major }}-${{ matrix.qt_version }}
-            ghcr.io/arbmind/qbs-clang-libstdcpp-qt:${{ matrix.qbs_version }}-${{ matrix.clang.major }}-${{ matrix.gcc.major }}-${{ matrix.qt_version }}
+            arbmind/qbs-clang-libstdcpp-qt:${{ matrix.qbs_version }}-${{ matrix.clang.major }}-${{ matrix.gcc.major }}-${{ matrix.qt.version }}
+            ghcr.io/arbmind/qbs-clang-libstdcpp-qt:${{ matrix.qbs_version }}-${{ matrix.clang.major }}-${{ matrix.gcc.major }}-${{ matrix.qt.version }}
             ${{ matrix.clang_libstdcpp_qt_tags }}
           build-args: |
             DISTRO=${{ matrix.distro }}
@@ -148,5 +156,6 @@ jobs:
             CLANG_SOURCE=${{ matrix.clang.source }}
             GCC_MAJOR=${{ matrix.gcc.major }}
             GCC_SOURCE=${{ matrix.gcc.source }}
-            QT_VERSION=${{ matrix.qt_version }}
+            QT_VERSION=${{ matrix.qt.version }}
+            QT_ARCH=${{ matrix.qt.arch }}
             QBS_VERSION=${{ matrix.qbs_version }}
