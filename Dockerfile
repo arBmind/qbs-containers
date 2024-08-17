@@ -20,7 +20,7 @@ ARG RUNTIME_APT="libicu74 libgssapi-krb5-2 libdbus-1-3 libpcre2-16-0"
 
 
 # base Qt setup
-FROM python:3.10-slim as qt_base
+FROM ghcr.io/rblaine95/python:3.10-slim as qt_base
 ARG QT_ARCH
 ARG QT_VERSION
 ARG QT_MODULES
