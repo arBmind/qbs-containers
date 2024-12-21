@@ -20,7 +20,7 @@ ARG RUNTIME_APT="libicu74 libgssapi-krb5-2 libdbus-1-3 libpcre2-16-0"
 
 
 # base Qt setup
-FROM python:3.10-slim as qt_base
+FROM python:3.10-slim AS qt_base
 ARG QT_ARCH
 ARG QT_VERSION
 ARG QT_MODULES
@@ -30,16 +30,17 @@ ARG DEBIAN_FRONTEND=noninteractive
 RUN pip install aqtinstall
 
 RUN <<INSTALL_7ZIP
-  apt update --quiet
-  apt-get install --yes --quiet --no-install-recommends \
+  apt-get -qq update -o=Dpkg::Use-Pty=0
+  apt-get -qq --yes install -o=Dpkg::Use-Pty=0 --no-install-recommends \
     p7zip-full \
     libglib2.0-0
-  apt-get --yes autoremove
-  apt-get clean autoclean
+  apt-get -qq --yes autoremove -o=Dpkg::Use-Pty=0
+  apt-get -qq clean autoclean -o=Dpkg::Use-Pty=0
   rm -rf /var/lib/apt/lists/{apt,dpkg,cache,log} /tmp/* /var/tmp/*
 INSTALL_7ZIP
 
 RUN <<INSTALL_QT
+  set -e
   mkdir /qt
   cd /qt
   aqt install-qt linux desktop ${QT_VERSION} ${QT_ARCH} -m ${QT_MODULES} --external $(which 7zr)
@@ -54,13 +55,13 @@ ARG APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1
 ARG DEBIAN_FRONTEND=noninteractive
 
 RUN <<INSTALL_WGET
-  apt-get update --quiet
-  apt-get upgrade --yes --quiet
-  apt-get install --yes --quiet --no-install-recommends \
+  apt-get -qq update -o=Dpkg::Use-Pty=0
+  apt-get -qq --yes upgrade -o=Dpkg::Use-Pty=0
+  apt-get -qq --yes install -o=Dpkg::Use-Pty=0 --no-install-recommends \
     ca-certificates \
     wget
-  apt-get --yes autoremove
-  apt-get clean autoclean
+  apt-get -qq --yes autoremove -o=Dpkg::Use-Pty=0
+  apt-get -qq clean autoclean -o=Dpkg::Use-Pty=0
   rm -rf /var/lib/apt/lists/{apt,dpkg,cache,log} /tmp/* /var/tmp/*
 INSTALL_WGET
 
@@ -85,9 +86,10 @@ ENV \
   LC_ALL=C.UTF-8
 
 RUN <<INSTALL_GCC
-  apt-get update --quiet
-  apt-get upgrade --yes --quiet
-  apt-get install --yes --quiet --no-install-recommends \
+  set -e
+  apt-get -qq update -o=Dpkg::Use-Pty=0
+  apt-get -qq --yes upgrade -o=Dpkg::Use-Pty=0
+  apt-get -qq --yes install -o=Dpkg::Use-Pty=0 --no-install-recommends \
     libglib2.0-0 \
     apt-transport-https \
     ca-certificates \
@@ -96,9 +98,9 @@ RUN <<INSTALL_GCC
   if [ "$GCC_SOURCE" = "ppa" ] ; then
     wget -qO - "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x60c317803a41ba51845e371a1e9377a2ba9ef27f" | apt-key add -
     echo "deb http://ppa.launchpad.net/ubuntu-toolchain-r/test/ubuntu ${DISTRO} main" > /etc/apt/sources.list.d/gcc.list
-    apt-get update --quiet
+    apt-get -qq update -o=Dpkg::Use-Pty=0
   fi
-  apt-get install --yes --quiet --no-install-recommends \
+  apt-get -qq --yes install -o=Dpkg::Use-Pty=0 --no-install-recommends \
     libstdc++-${GCC_MAJOR}-dev \
     gcc-${GCC_MAJOR} \
     g++-${GCC_MAJOR} \
@@ -108,8 +110,8 @@ RUN <<INSTALL_GCC
   update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-${GCC_MAJOR} 100
   update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-${GCC_MAJOR} 100
   c++ --version
-  apt-get --yes autoremove
-  apt-get clean autoclean
+  apt-get -qq --yes autoremove -o=Dpkg::Use-Pty=0
+  apt-get -qq clean autoclean -o=Dpkg::Use-Pty=0
   rm -rf /var/lib/apt/lists/{apt,dpkg,cache,log} /tmp/* /var/tmp/*
 INSTALL_GCC
 
@@ -124,7 +126,7 @@ ARG QT_ARCH
 ARG QBS_VERSION
 
 LABEL Description="Ubuntu ${DISTRO} - Gcc${GCC_MAJOR} + Qbs ${QBS_VERSION}"
-LABEL org.opencontainers.image.source = "https://github.com/arBmind/qbs-containers"
+LABEL org.opencontainers.image.source="https://github.com/arBmind/qbs-containers"
 
 COPY --from=qbs_base /opt/qbs /opt/qbs
 ENV \
@@ -148,7 +150,7 @@ ARG QT_ARCH
 ARG QBS_VERSION
 
 LABEL Description="Ubuntu ${DISTRO} - Gcc${GCC_MAJOR} + Qbs ${QBS_VERSION} + Qt ${QT_VERSION}"
-LABEL org.opencontainers.image.source = "https://github.com/arBmind/qbs-containers"
+LABEL org.opencontainers.image.source="https://github.com/arBmind/qbs-containers"
 
 COPY --from=qbs_base /opt/qbs /opt/qbs
 COPY --from=qt_base /qt/${QT_VERSION} /qt/${QT_VERSION}
@@ -182,9 +184,9 @@ ENV \
 
 # install Clang (https://apt.llvm.org/)
 RUN <<INSTALL_CLANG
-  apt-get update --quiet
-  apt-get upgrade --yes --quiet
-  apt-get install --yes --quiet --no-install-recommends \
+  apt-get -qq update -o=Dpkg::Use-Pty=0
+  apt-get -qq --yes upgrade -o=Dpkg::Use-Pty=0
+  apt-get -qq --yes install -o=Dpkg::Use-Pty=0 --no-install-recommends \
     libglib2.0-0 \
     wget \
     gnupg \
@@ -193,15 +195,15 @@ RUN <<INSTALL_CLANG
   if [ "$CLANG_SOURCE" = "llvm" ] ; then
     wget -qO - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -
     echo "deb http://apt.llvm.org/${DISTRO}/ llvm-toolchain-${DISTRO}-${CLANG_MAJOR} main" > /etc/apt/sources.list.d/llvm.list
-    apt-get update --quiet
+    apt-get -qq update -o=Dpkg::Use-Pty=0
   fi
-  apt-get install --yes --quiet --no-install-recommends \
+  apt-get -qq --yes install -o=Dpkg::Use-Pty=0 --no-install-recommends \
     ${RUNTIME_APT} \
     clang-${CLANG_MAJOR} \
     lld-${CLANG_MAJOR} \
     libc++abi-${CLANG_MAJOR}-dev \
-    libc++-${CLANG_MAJOR}-dev
-    $( [ $CLANG_MAJOR -ge 12 ] echo "libunwind-${CLANG_MAJOR}-dev" )
+    libc++-${CLANG_MAJOR}-dev \
+    $( [ $CLANG_MAJOR -ge 12 ] && echo "libunwind-${CLANG_MAJOR}-dev" )
   update-alternatives --install /usr/bin/cc cc /usr/bin/clang-${CLANG_MAJOR} 100
   update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++-${CLANG_MAJOR} 100
   update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-${CLANG_MAJOR} 100
@@ -210,8 +212,8 @@ RUN <<INSTALL_CLANG
   update-alternatives --install /usr/bin/ld ld /usr/bin/ld.gold 20
   update-alternatives --install /usr/bin/ld ld /usr/bin/ld.bfd 30
   c++ --version
-  apt-get --yes autoremove
-  apt-get clean autoclean
+  apt-get -qq --yes autoremove -o=Dpkg::Use-Pty=0
+  apt-get -qq clean autoclean -o=Dpkg::Use-Pty=0
   rm -rf /var/lib/apt/lists/{apt,dpkg,cache,log} /tmp/* /var/tmp/*
 INSTALL_CLANG
 
@@ -226,7 +228,7 @@ ARG APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1
 ARG DEBIAN_FRONTEND=noninteractive
 
 LABEL Description="Ubuntu ${DISTRO} - Clang${CLANG_MAJOR} + Qbs ${QBS_VERSION}"
-LABEL org.opencontainers.image.source = "https://github.com/arBmind/qbs-containers"
+LABEL org.opencontainers.image.source="https://github.com/arBmind/qbs-containers"
 
 COPY --from=qbs_base /opt/qbs /opt/qbs
 ENV \
@@ -241,6 +243,7 @@ WORKDIR /project
 ENTRYPOINT ["/opt/qbs/bin/qbs"]
 
 
+
 FROM clang_base AS clang_libstdcpp_base
 ARG DISTRO
 ARG GCC_MAJOR
@@ -252,12 +255,12 @@ RUN <<INSTALL_LIBSTDCPP
   if [ "$GCC_SOURCE" = "ppa" ] ; then
     wget -qO - "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x60c317803a41ba51845e371a1e9377a2ba9ef27f" | apt-key add -
     echo "deb http://ppa.launchpad.net/ubuntu-toolchain-r/test/ubuntu ${DISTRO} main" > /etc/apt/sources.list.d/gcc.list
-    apt-get update --quiet
+    apt-get -qq update -o=Dpkg::Use-Pty=0
   fi
-  apt-get install --yes --quiet --no-install-recommends \
+  apt-get -qq --yes install -o=Dpkg::Use-Pty=0 --no-install-recommends \
     libstdc++-${GCC_MAJOR}-dev
-  apt-get --yes autoremove
-  apt-get clean autoclean
+  apt-get -qq --yes autoremove -o=Dpkg::Use-Pty=0
+  apt-get -qq clean autoclean -o=Dpkg::Use-Pty=0
   rm -rf /var/lib/apt/lists/{apt,dpkg,cache,log} /tmp/* /var/tmp/*
 INSTALL_LIBSTDCPP
 
@@ -297,7 +300,7 @@ ARG QT_ARCH
 ARG QBS_VERSION
 
 LABEL Description="Ubuntu ${DISTRO} - Clang${CLANG_MAJOR} + Libstdc++-${GCC_MAJOR} + Qbs ${QBS_VERSION} + Qt ${QT_VERSION}"
-LABEL org.opencontainers.image.source = "https://github.com/arBmind/qbs-containers"
+LABEL org.opencontainers.image.source="https://github.com/arBmind/qbs-containers"
 
 COPY --from=qbs_base /opt/qbs /opt/qbs
 COPY --from=qt_base /qt/${QT_VERSION} /qt/${QT_VERSION}
