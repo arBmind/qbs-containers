@@ -4,20 +4,21 @@ on: push
 
 jobs:
   define-matrix:
+    name: "Prepare"
     runs-on: ubuntu-24.04
     outputs:
-      distros: ${{ steps.matrix.outputs.distros }}      
+      distros: ${{ steps.matrix.outputs.distros }}
       qbs_versions: ${{ steps.matrix.outputs.qbs_versions }}
       clangs: ${{ steps.matrix.outputs.clangs }}
       gccs: ${{ steps.matrix.outputs.gccs }}
       qts: ${{ steps.matrix.outputs.qts }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Define Matrix
-        id: matrix   
-        shell: python {0} >> "$GITHUB_OUTPUT"
+        id: matrix
+        shell: python
         run: |
           import yaml
           with open('docker_build_matrix.yml', 'r') as file:
@@ -33,7 +34,6 @@ jobs:
             print(f'qts={json.dumps(matrix['qt'])}', file=fh)
 
   qbs:
-    name: "Qbs Docker builds"
     needs: define-matrix
     strategy:
       fail-fast: false
@@ -41,6 +41,7 @@ jobs:
         qbs_version: ${{ fromJSON(needs.define-matrix.outputs.qbs_versions) }}
         qt: ${{ fromJSON(needs.define-matrix.outputs.qts) }}
 
+    name: "Build (Qbs ${{ matrix.qbs_version }}, Qt ${{ matrix.qt.version }})"
     runs-on: ubuntu-24.04
     steps:
       - name: Free Disk Space (Ubuntu)
@@ -48,7 +49,8 @@ jobs:
         with:
           tool-cache: true
 
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
