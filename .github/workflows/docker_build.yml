@@ -6,29 +6,31 @@ jobs:
   define-matrix:
     runs-on: ubuntu-24.04
     outputs:
+      distros: ${{ steps.matrix.outputs.distros }}      
       qbs_versions: ${{ steps.matrix.outputs.qbs_versions }}
+      clangs: ${{ steps.matrix.outputs.clangs }}
+      gccs: ${{ steps.matrix.outputs.gccs }}
       qts: ${{ steps.matrix.outputs.qts }}
     steps:
-      - name: Define Matrix
-        id: matrix
-        run: |
-          echo "qbs_versions=$(cat <<JSON_EOF | jq -c
-            [
-              "2.3.1",
-              "2.4.2",
-              "2.5.0"
-            ]
-          JSON_EOF
-          )" >> "$GITHUB_OUTPUT"
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-          echo "qts=$(cat <<JSON_EOF | jq -c
-            [
-              {"version": "6.6.3", "arch": "gcc_64"},
-              {"version": "6.7.3", "arch": "linux_gcc_64"},
-              {"version": "6.8.1", "arch": "linux_gcc_64"}
-            ]
-          JSON_EOF
-          )" >> "$GITHUB_OUTPUT"
+      - name: Define Matrix
+        id: matrix   
+        shell: python {0} >> "$GITHUB_OUTPUT"
+        run: |
+          import yaml
+          with open('docker_build_matrix.yml', 'r') as file:
+              matrix = yaml.safe_load(file)
+
+          import os
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:
+            import json
+            print(f'distros=[{json.dumps(matrix["distro"])}]', file=fh)
+            print(f'qbs_versions={json.dumps(matrix['qbs'])}', file=fh)
+            print(f'clangs={json.dumps(matrix['clang'])}', file=fh)
+            print(f'gccs={json.dumps(matrix['gcc'])}', file=fh)
+            print(f'qts={json.dumps(matrix['qt'])}', file=fh)
 
   qbs:
     name: "Qbs Docker builds"
@@ -71,9 +73,12 @@ jobs:
         with:
           push: ${{ github.event_name != 'pull_request' }}
         env:
+          ALL_DISTROS: ${{ needs.define-matrix.outputs.distros }}
+          ALL_QBS_VERSIONS: ${{ needs.define-matrix.outputs.qbs_versions }}
+          ALL_CLANGS: ${{ needs.define-matrix.outputs.clangs }}
+          ALL_GCCS: ${{ needs.define-matrix.outputs.gccs }}
+          ALL_QTS: ${{ needs.define-matrix.outputs.qts }}
           QBS_VERSIONS: |
             [${{ toJSON(matrix.qbs_version) }}]
           QTS: |
             [${{ toJSON(matrix.qt) }}]
-          ALL_QBS_VERSIONS: ${{ needs.define-matrix.outputs.qbs_versions }}
-          ALL_QTS: ${{ needs.define-matrix.outputs.qts }}
