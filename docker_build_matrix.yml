@@ -4,12 +4,14 @@ distro: "noble"
 qbs:
   - "2.3.1"
   - "2.4.2"
-  - "2.5.0"
+  - "2.5.1"
+  - "2.6.0"
 
 clang:
   - { major: 17, source: "apt" }
   - { major: 18, source: "llvm" }
   - { major: 19, source: "llvm" }
+  - { major: 20, source: "llvm" }
 
 gcc:
   - { major: 12, source: "apt" }
@@ -19,4 +21,5 @@ gcc:
 qt:
   - { version: "6.6.3", arch: "gcc_64" }
   - { version: "6.7.3", arch: "linux_gcc_64" }
-  - { version: "6.8.1", arch: "linux_gcc_64" }
+  - { version: "6.8.3", arch: "linux_gcc_64" }
+  - { version: "6.9.0", arch: "linux_gcc_64" }

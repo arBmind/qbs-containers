@@ -21,15 +21,15 @@ ARG RUNTIME_APT="libicu74 libgssapi-krb5-2 libdbus-1-3 libpcre2-16-0"
 
 # base Qt setup
 FROM python:3.10-slim AS qt_base
-ARG QT_ARCH
-ARG QT_VERSION
-ARG QT_MODULES
-ARG APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1
-ARG DEBIAN_FRONTEND=noninteractive
+ARG \
+  QT_ARCH \
+  QT_VERSION \
+  QT_MODULES \
+  APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1 \
+  DEBIAN_FRONTEND=noninteractive
 
-RUN pip install aqtinstall
-
-RUN <<INSTALL_7ZIP
+RUN <<INSTALL_AQT
+  pip install aqtinstall
   apt-get -qq update -o=Dpkg::Use-Pty=0
   apt-get -qq --yes install -o=Dpkg::Use-Pty=0 --no-install-recommends \
     p7zip-full \
@@ -37,7 +37,7 @@ RUN <<INSTALL_7ZIP
   apt-get -qq --yes autoremove -o=Dpkg::Use-Pty=0
   apt-get -qq clean autoclean -o=Dpkg::Use-Pty=0
   rm -rf /var/lib/apt/lists/{apt,dpkg,cache,log} /tmp/* /var/tmp/*
-INSTALL_7ZIP
+INSTALL_AQT
 
 RUN <<INSTALL_QT
   set -e
@@ -50,9 +50,10 @@ INSTALL_QT
 
 # base Qbs setup
 FROM ubuntu:${DISTRO} AS qbs_base
-ARG QBS_URL
-ARG APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1
-ARG DEBIAN_FRONTEND=noninteractive
+ARG \
+  QBS_URL \
+  APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1 \
+  DEBIAN_FRONTEND=noninteractive
 
 RUN <<INSTALL_WGET
   apt-get -qq update -o=Dpkg::Use-Pty=0
@@ -74,13 +75,13 @@ INSTALL_QBS
 
 # base compiler setup for GCC
 FROM ubuntu:${DISTRO} AS gcc_base
-ARG DISTRO
-ARG GCC_MAJOR
-ARG GCC_SOURCE
-ARG RUNTIME_APT
-ARG APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1
-ARG DEBIAN_FRONTEND=noninteractive
-
+ARG \
+  DISTRO \
+  GCC_MAJOR \
+  GCC_SOURCE \
+  RUNTIME_APT \
+  APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1 \
+  DEBIAN_FRONTEND=noninteractive
 ENV \
   LANG=C.UTF-8 \
   LC_ALL=C.UTF-8
@@ -119,15 +120,6 @@ INSTALL_GCC
 
 # final qbs-gcc (no Qt)
 FROM gcc_base AS qbs-gcc
-ARG DISTRO
-ARG GCC_MAJOR
-ARG QT_VERSION
-ARG QT_ARCH
-ARG QBS_VERSION
-
-LABEL Description="Ubuntu ${DISTRO} - Gcc${GCC_MAJOR} + Qbs ${QBS_VERSION}"
-LABEL org.opencontainers.image.source="https://github.com/arBmind/qbs-containers"
-
 COPY --from=qbs_base /opt/qbs /opt/qbs
 ENV \
   PATH=/opt/qbs/bin:${PATH}
@@ -143,14 +135,7 @@ ENTRYPOINT ["/opt/qbs/bin/qbs"]
 
 # final qbs-gcc-qt (with Qt)
 FROM gcc_base AS qbs-gcc-qt
-ARG DISTRO
-ARG GCC_MAJOR
 ARG QT_VERSION
-ARG QT_ARCH
-ARG QBS_VERSION
-
-LABEL Description="Ubuntu ${DISTRO} - Gcc${GCC_MAJOR} + Qbs ${QBS_VERSION} + Qt ${QT_VERSION}"
-LABEL org.opencontainers.image.source="https://github.com/arBmind/qbs-containers"
 
 COPY --from=qbs_base /opt/qbs /opt/qbs
 COPY --from=qt_base /qt/${QT_VERSION} /qt/${QT_VERSION}
@@ -171,13 +156,13 @@ ENTRYPOINT ["/opt/qbs/bin/qbs"]
 
 # base compiler setup for Clang
 FROM ubuntu:${DISTRO} AS clang_base
-ARG DISTRO
-ARG CLANG_MAJOR
-ARG CLANG_SOURCE
-ARG APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1
-ARG DEBIAN_FRONTEND=noninteractive
-ARG RUNTIME_APT
-
+ARG \
+  DISTRO \
+  CLANG_MAJOR \
+  CLANG_SOURCE \
+  APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1 \
+  DEBIAN_FRONTEND=noninteractive \
+  RUNTIME_APT
 ENV \
   LANG=C.UTF-8 \
   LC_ALL=C.UTF-8
@@ -221,15 +206,6 @@ INSTALL_CLANG
 
 # final qbs-clang (no Qt)
 FROM clang_base AS qbs-clang
-ARG DISTRO
-ARG CLANG_MAJOR
-ARG QBS_VERSION
-ARG APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1
-ARG DEBIAN_FRONTEND=noninteractive
-
-LABEL Description="Ubuntu ${DISTRO} - Clang${CLANG_MAJOR} + Qbs ${QBS_VERSION}"
-LABEL org.opencontainers.image.source="https://github.com/arBmind/qbs-containers"
-
 COPY --from=qbs_base /opt/qbs /opt/qbs
 ENV \
   PATH=/opt/qbs/bin:${PATH}
@@ -245,11 +221,12 @@ ENTRYPOINT ["/opt/qbs/bin/qbs"]
 
 
 FROM clang_base AS clang_libstdcpp_base
-ARG DISTRO
-ARG GCC_MAJOR
-ARG GCC_SOURCE
-ARG APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1
-ARG DEBIAN_FRONTEND=noninteractive
+ARG \
+  DISTRO \
+  GCC_MAJOR \
+  GCC_SOURCE \
+  APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1 \
+  DEBIAN_FRONTEND=noninteractive
 
 RUN <<INSTALL_LIBSTDCPP
   if [ "$GCC_SOURCE" = "ppa" ] ; then
@@ -268,14 +245,6 @@ INSTALL_LIBSTDCPP
 
 # final qbs-clang-libstdcpp (no Qt)
 FROM clang_libstdcpp_base AS qbs-clang-libstdcpp
-ARG DISTRO
-ARG CLANG_MAJOR
-ARG GCC_MAJOR
-ARG QBS_VERSION
-
-LABEL Description="Ubuntu ${DISTRO} - Clang${CLANG_MAJOR} + Libstdc++-${GCC_MAJOR} + Qbs ${QBS_VERSION}"
-LABEL org.opencontainers.image.source = "https://github.com/arBmind/qbs-containers"
-
 COPY --from=qbs_base /opt/qbs /opt/qbs
 ENV \
   PATH=/opt/qbs/bin:${PATH}
@@ -292,15 +261,7 @@ ENTRYPOINT ["/opt/qbs/bin/qbs"]
 
 # final qbs-clang-qt (with Qt)
 FROM clang_libstdcpp_base AS qbs-clang-libstdcpp-qt
-ARG DISTRO
-ARG CLANG_MAJOR
-ARG GCC_MAJOR
 ARG QT_VERSION
-ARG QT_ARCH
-ARG QBS_VERSION
-
-LABEL Description="Ubuntu ${DISTRO} - Clang${CLANG_MAJOR} + Libstdc++-${GCC_MAJOR} + Qbs ${QBS_VERSION} + Qt ${QT_VERSION}"
-LABEL org.opencontainers.image.source="https://github.com/arBmind/qbs-containers"
 
 COPY --from=qbs_base /opt/qbs /opt/qbs
 COPY --from=qt_base /qt/${QT_VERSION} /qt/${QT_VERSION}
