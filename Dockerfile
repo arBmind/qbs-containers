@@ -1,22 +1,22 @@
 ARG DISTRO=noble
-ARG CLANG_MAJOR=18
+ARG CLANG_MAJOR=21
 # clang source options:
 # apt - directly use apt version
 # llvm - add llvm distro repo
-ARG CLANG_SOURCE=apt
+ARG CLANG_SOURCE=llvm
 ARG GCC_MAJOR=14
 # gcc source options:
 # apt - directly use apt version
 # ppa - add toolchain ppa
 ARG GCC_SOURCE=apt
-ARG QT_VERSION=6.7.1
+ARG QT_VERSION=6.9.2
 ARG QT_ARCH=linux_gcc_64
 ARG QT_MODULES=""
-ARG QBS_VERSION="2.3.1"
+ARG QBS_VERSION="3.0.3"
 ARG QBS_URL="https://download.qt.io/official_releases/qbs/${QBS_VERSION}/qbs-linux-x86_64-${QBS_VERSION}.tar.gz"
 # Ubuntu lunar
 # ARG RUNTIME_APT="libicu72 libgssapi-krb5-2 libdbus-1-3 libpcre2-16-0"
-ARG RUNTIME_APT="libicu74 libgssapi-krb5-2 libdbus-1-3 libpcre2-16-0"
+ARG RUNTIME_APT="icu-devtools libgssapi-krb5-2 libdbus-1-3 libpcre2-16-0"
 
 
 # base Qt setup
@@ -178,8 +178,15 @@ RUN <<INSTALL_CLANG
     apt-transport-https \
     ca-certificates
   if [ "$CLANG_SOURCE" = "llvm" ] ; then
-    wget -qO - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -
-    echo "deb http://apt.llvm.org/${DISTRO}/ llvm-toolchain-${DISTRO}-${CLANG_MAJOR} main" > /etc/apt/sources.list.d/llvm.list
+    wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key > /etc/apt/trusted.gpg.d/apt.llvm.org.asc
+    tee /etc/apt/sources.list.d/llvm.sources <<LLVM_SOURCES
+Enabled: yes
+Types: deb
+URIs: http://apt.llvm.org/${DISTRO}/
+Suites: llvm-toolchain-${DISTRO}-${CLANG_MAJOR}
+Components: main
+Signed-By: /etc/apt/trusted.gpg.d/apt.llvm.org.asc
+LLVM_SOURCES
     apt-get -qq update -o=Dpkg::Use-Pty=0
   fi
   apt-get -qq --yes install -o=Dpkg::Use-Pty=0 --no-install-recommends \
