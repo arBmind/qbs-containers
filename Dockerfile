@@ -161,6 +161,7 @@ COPY --from=qt_base /qt/${QT_VERSION} /qt/${QT_VERSION}
 ENV \
   QTDIR=/qt/${QT_VERSION}/gcc_64 \
   PATH=/qt/${QT_VERSION}/gcc_64/bin:/opt/qbs/bin:${PATH}
+# LD_LIBRARY_PATH=/qt/${QT_VERSION}/gcc_64/lib
 
 RUN <<SETUP_QBS_GCC_QT
   qbs setup-toolchains --type gcc /usr/bin/g++ gcc
@@ -293,6 +294,7 @@ COPY --from=qt_base /qt/${QT_VERSION} /qt/${QT_VERSION}
 ENV \
   QTDIR=/qt/${QT_VERSION}/gcc_64 \
   PATH=/qt/${QT_VERSION}/gcc_64/bin:/opt/qbs/bin:${PATH}
+# LD_LIBRARY_PATH=/qt/${QT_VERSION}/gcc_64/lib
 
 RUN <<SETUP_QBS_CLANG_QT
   qbs setup-toolchains --type clang /usr/bin/clang++ clang
